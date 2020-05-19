@@ -1,0 +1,20 @@
+name: build & push to docker hub
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    env:
+      DOCKER_IMAGE: twwlf/kubectl
+      VERSIONS: 1.18.0 1.17.4 1.16.8 1.15.11
+    runs-on: ubuntu-latest
+    steps:
+      - run: docker login -u ${{secrets.DOCKER_USERNAME}} -p ${{secrets.DOCKER_PASSWORD}}
+      - uses: actions/checkout@v2
+      - run: |
+          for version in ${VERSIONS[@]}; do
+            docker build -t ${DOCKER_IMAGE}:${version} --build-arg version=v${version} .
+            docker push ${DOCKER_IMAGE}:${version}
+          done
